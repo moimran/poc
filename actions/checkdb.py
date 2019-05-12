@@ -7,7 +7,7 @@ class RunCheckPort(Action):
         if(self.check_db(device_ip, port, db_username, db_password) == True):
             return True
         else:
-            return False
+            return (False, "Failed!")
 
 
     def check_db(self, device_ip, port, db_username, db_password):
