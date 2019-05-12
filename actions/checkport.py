@@ -11,11 +11,11 @@ class RunCheckPort(Action):
         s = socket.socket()
         print("Attempting to connect to {} on port {}".format(hostname, port))
         try:
-            s.settimeout(self.tcp_session)
+            s.settimeout(3)
             s.connect((hostname, port))
             print("Connected to {} on port {}".format(hostname, port))
             s.close()
             return True, "SUCCESS"
         except:
-            print("Connection to {} on port %s failed".format(hostname, port))
+            print("Connection to {} on port {} failed".format(hostname, port))
             return False, 'FAIL'
