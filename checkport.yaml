@@ -1,0 +1,13 @@
+---
+name: checkport
+pack: poc
+runner_type: "python-script"
+description: "Telnet to a port"
+enabled: true
+entry_point: checkport.py
+parameters:
+    device_ip:
+      type: string
+      description: "device IP address"
+      required: true
+      position: 0

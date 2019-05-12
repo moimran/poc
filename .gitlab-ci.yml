@@ -1,0 +1,125 @@
+stages:
+  - Test
+  - QA
+  - Staging
+  - Production
+ 
+variables:
+  PACK_NAME: dd_meraki
+  PACK_DIR: /opt/stackstorm/packs/
+  ST2_CONFIG_DIR: /opt/stackstorm/configs
+  # only update this version when creating a release branch **update pack.yml to match**
+  MAJOR_VERSION: 1
+  MINOR_VERSION: 0
+  PATCH_VERSION: 0
+  VERSION: $MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION
+  LOG_DIRECTORY: $CI_PROJECT_DIR/TestResults
+  # docker st2 container names
+  QA_STACKSTORM_CONTAINER_NAME: stackstormqa_stackstorm_1
+  UAT_STACKSTORM_CONTAINER_NAME: stackstormuat_stackstorm_1
+  # environment endpoints for ST2 portal
+  MCP_ENDPOINT_QA: st2-qa.dimensiondata.com.au
+  MCP_ENDPOINT_UAT: st2-uat.dimensiondata.com.au
+  # used to modified the error threshold for unit tests
+  #PIPELINE_ERROR_THRESHOLD: 4
+
+Unit Tests:
+  stage: Test
+  tags:
+  # mcp development runner
+    - azure_prod-build-linux
+  image: artifactory.dimensiondata.com/docker/dd_st2_ci_tools:latest
+  before_script:
+    - mkdir -p $LOG_DIRECTORY
+  script:
+    - st2-run-unittests $CI_PROJECT_DIR
+  artifacts:
+    when: on_failure
+    paths:
+      - "$LOG_DIRECTORY"
+  only:
+    - develop
+    - /^feature/.*$/
+  when: always
+
+QA:
+  stage: QA
+  tags:
+  # mcp development runner
+  # - mcp_dev-linux
+  # mcp lab runner
+    - mcp_lab01-linux
+  before_script:
+    - docker cp $CI_PROJECT_DIR $QA_STACKSTORM_CONTAINER_NAME:$PACK_DIR
+  script:
+    - docker exec -i $QA_STACKSTORM_CONTAINER_NAME sh -c "st2ctl reload --register-all"
+    - docker exec -i $QA_STACKSTORM_CONTAINER_NAME sh -c "st2ctl reload --register-configs"
+    - docker exec -i $QA_STACKSTORM_CONTAINER_NAME sh -c "st2 run packs.setup_virtualenv packs=$PACK_NAME"
+  environment:
+    name: MCP_QA
+    url: https://$MCP_ENDPOINT_QA
+  only:
+    - develop
+    
+QA_V2:
+  stage: QA
+  tags:
+    - gsoa_dev-linux
+  before_script:
+    - RUNNINGCONTAINERS=`docker ps -a -q -f name=CWI_.* -f status=running`
+  script:
+    - |
+      for container in $RUNNINGCONTAINERS
+      do
+
+         docker cp $CI_PROJECT_DIR $container:$PACK_DIR
+         docker exec -i $container sh -c "st2ctl reload --register-all"
+         docker exec -i $container sh -c "st2ctl reload --register-configs"
+         docker exec -i $container sh -c "st2 run packs.setup_virtualenv packs=$PACK_NAME"
+      done
+  environment:
+    name: GSOA_PROD
+  only:
+    - develop
+
+UAT:
+  stage: Staging
+  tags:
+  # mcp staging runner
+  # - mcp_staging-linux
+  # mcp lab runner
+    - mcp_lab02-linux
+  before_script:
+    - docker cp $CI_PROJECT_DIR $UAT_STACKSTORM_CONTAINER_NAME:$PACK_DIR
+  script:
+    - docker exec -i $UAT_STACKSTORM_CONTAINER_NAME sh -c "st2ctl reload --register-all"
+    - docker exec -i $UAT_STACKSTORM_CONTAINER_NAME sh -c "st2ctl reload --register-configs"
+    - docker exec -i $UAT_STACKSTORM_CONTAINER_NAME sh -c "st2 run packs.setup_virtualenv packs=$PACK_NAME"
+  environment:
+    name: MCP_UAT
+    url: https://$MCP_ENDPOINT_UAT
+  only:
+    - /^release/.*$/
+  when: manual
+
+Production:
+  stage: Production
+  tags:
+    - gsoa_prod-linux
+  before_script:
+    - RUNNINGCONTAINERS=`docker ps -a -q -f name=CWI_.* -f status=running`
+  script:
+    - |
+      for container in $RUNNINGCONTAINERS
+      do
+
+         docker cp $CI_PROJECT_DIR $container:$PACK_DIR
+         docker exec -i $container sh -c "st2ctl reload --register-all"
+         docker exec -i $container sh -c "st2ctl reload --register-configs"
+         docker exec -i $container sh -c "st2 run packs.setup_virtualenv packs=$PACK_NAME"
+      done
+  environment:
+    name: GSOA_PROD
+  only:
+    - master
+  when: on_success
