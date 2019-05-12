@@ -1,3 +1,4 @@
+MySQL-python
 mysqlclient
 mysql-connector
 mysql-connector-python
