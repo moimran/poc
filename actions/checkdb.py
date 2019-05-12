@@ -3,12 +3,14 @@ import mysql.connector
 
 class RunCheckPort(Action):
     def run(self, device_ip, port, db_username, db_password):
-        self.check_db(device_ip, port, db_username, db_password)
+        print("Attempting to connect to {} on port {}\n".format(device_ip, port))
+        if(self.check_db(device_ip, port, db_username, db_password)):
+            return True
+        else:
+            return False
 
 
     def check_db(self, device_ip, port, db_username, db_password):
-
-        print("Attempting to connect to {} on port {}\n".format(device_ip, port))
         try:
             mydb = mysql.connector.connect(
             host=device_ip,
