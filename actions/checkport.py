@@ -11,7 +11,7 @@ class RunCheckPort(Action):
         s = socket.socket()
         print("Attempting to connect to {} on port {}\n".format(hostname, port))
         try:
-            s.connect((hostname, port))
+            s.connect((hostname, 9001))
             print("Connected to {} on port {}".format(hostname, port))
             s.close()
             return True, "SUCCESS"
