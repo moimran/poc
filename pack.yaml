@@ -4,6 +4,7 @@ name: poc
 description: Pack for poc.
 keywords:
     - checkport
+    - checkdb
 version: 1.0.2
 author: Dimension Data Australia.
 email: AutomationTeamAU@dimensiondata.com

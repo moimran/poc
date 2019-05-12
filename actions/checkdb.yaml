@@ -1,0 +1,28 @@
+---
+name: checkdb
+pack: poc
+runner_type: "python-script"
+description: "connect to DB port"
+enabled: true
+entry_point: checkdb.py
+parameters:
+    device_ip:
+      type: string
+      description: "device IP address"
+      required: true
+      position: 0
+    port:
+      type: string
+      description: "server port"
+      required: true
+      position: 1
+    db_username:
+      type: string
+      description: "db user"
+      required: true
+      position: 2
+    db_password:
+      type: string
+      description: "db password of user"
+      required: true
+      position: 3
