@@ -9,9 +9,8 @@ class RunCheckPort(Action):
     def check_port(self, hostname, port):
         # Create a TCP socket
         s = socket.socket()
-        print("Attempting to connect to {} on port {}".format(hostname, port))
+        print("Attempting to connect to {} on port {}\n".format(hostname, port))
         try:
-            s.settimeout(3)
             s.connect((hostname, port))
             print("Connected to {} on port {}".format(hostname, port))
             s.close()
