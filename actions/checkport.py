@@ -2,13 +2,12 @@ from st2common.runners.base_action import Action
 import socket
 
 class RunCheckPort(Action):
-    def run(self, device_ip):
-        self.check_port(device_ip)
+    def run(self, device_ip, port):
+        self.check_port(device_ip, port)
 
 
-    def check_port(self, hostname):
+    def check_port(self, hostname, port):
         # Create a TCP socket
-        port = '80'
         s = socket.socket()
         print("Attempting to connect to {} on port {}".format(hostname, port))
         try:

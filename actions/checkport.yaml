@@ -11,3 +11,8 @@ parameters:
       description: "device IP address"
       required: true
       position: 0
+    port:
+      type: string
+      description: "server port"
+      required: true
+      position: 1
